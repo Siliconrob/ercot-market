@@ -5,7 +5,11 @@
   "main": "index.js",
   "dependencies": {
     "@hapi/hapi": "^18.4.0",
+    "@hapi/joi": "^16.1.8",
+    "cheerio": "^1.0.0-rc.3",
+    "csv": "^5.3.1",
     "knex": "^0.20.6",
+    "node-stream-zip": "^1.8.2",
     "sqlite3": "^4.1.1"
   },
   "devDependencies": {},
