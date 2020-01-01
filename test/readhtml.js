@@ -4,13 +4,6 @@ const querystring = require('querystring');
 
 const reportUrl = new URL('http://mis.ercot.com/misapp/GetReports.do?reportTypeId=13052');
 
-function reject(obj, keys) {
-  return Object.keys(obj)
-      .filter(z => !keys.includes(z))
-      .map(z => Object.assign({}, {[z]: obj[z]}))
-      .reduce((res, o) => Object.assign(res, o), {});
-};
-
 function extractLink(link) {
   const fullUrl = new URL(`${reportUrl.protocol}//${reportUrl.host}${link.attrs.href}`);
   if (fullUrl.searchParams.has("mimic_duns") && Number(fullUrl.searchParams.get("mimic_duns")) == 0) {
