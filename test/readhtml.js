@@ -1,6 +1,5 @@
 const jssoup = require('jssoup').default;
 const request = require('request');
-const querystring = require('querystring');
 
 const reportUrl = new URL('http://mis.ercot.com/misapp/GetReports.do?reportTypeId=13052');
 
@@ -14,14 +13,17 @@ function extractLink(link) {
   return parsedUrl;
 };
 
-request(reportUrl.href, (error, response, body) => {
-  console.error('error:', error);
-  console.log('statusCode:', response && response.statusCode);
-  //console.log('body:', body);
-  let soup = new jssoup(body);
-  let links = soup.findAll('a');
-  links.map(z => {
-    const link = extractLink(z);
-    console.log(link.href);
+module.exports = function downloadSCEDUrls() {
+  request(reportUrl.href, (error, response, body) => {
+    console.error('error:', error);
+    console.log('statusCode:', response && response.statusCode);
+    //console.log('body:', body);
+    let soup = new jssoup(body);
+    let links = soup.findAll('a');
+    links.map(z => {
+      const link = extractLink(z);
+      console.log(link.href);
+    });
   });
-});
+};
+
