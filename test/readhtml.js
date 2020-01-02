@@ -1,29 +1,40 @@
 const jssoup = require('jssoup').default;
-const request = require('request');
+const axios = require('axios');
+const ercotBaseUrl = 'http://mis.ercot.com/';
 
-const reportUrl = new URL('http://mis.ercot.com/misapp/GetReports.do?reportTypeId=13052');
-
-function extractLink(link) {
-  const fullUrl = new URL(`${reportUrl.protocol}//${reportUrl.host}${link.attrs.href}`);
-  if (fullUrl.searchParams.has("mimic_duns") && Number(fullUrl.searchParams.get("mimic_duns")) == 0) {
-    fullUrl.searchParams.delete("mimic_duns");
-  }
-  const filteredParams = fullUrl.searchParams.toString();  
-  const parsedUrl = new URL(`${fullUrl.protocol}//${fullUrl.host}${fullUrl.pathname}?${filteredParams}`);
-  return parsedUrl;
+const reportLink = {
+  url: new URL(`${ercotBaseUrl}misapp/GetReports.do?reportTypeId=13052`),
+  validateParams: [
+    "mimic_duns"
+  ]
 };
 
-module.exports = function downloadSCEDUrls() {
-  request(reportUrl.href, (error, response, body) => {
-    console.error('error:', error);
-    console.log('statusCode:', response && response.statusCode);
-    //console.log('body:', body);
-    let soup = new jssoup(body);
-    let links = soup.findAll('a');
-    links.map(z => {
-      const link = extractLink(z);
-      console.log(link.href);
-    });
+function refineLink(link) {
+  let fullUrl =  new URL(link.attrs.href, ercotBaseUrl);
+  (reportLink.validateParams || []).forEach(element => {
+    if (fullUrl.searchParams.has(element) && Number(fullUrl.searchParams.get(element)) == 0) {
+      fullUrl.searchParams.delete(element);
+    }
+  });
+  return fullUrl;
+}
+
+function extractLink(link) { 
+  const fullUrl = refineLink(link);
+  const filteredParams = fullUrl.searchParams.toString();
+  return new URL(`${fullUrl.protocol}//${fullUrl.host}${fullUrl.pathname}?${filteredParams}`);
+};
+
+async function readHTML() {
+  const response = await axios.get(reportLink.url.href);
+  const soup = new jssoup(response.data);
+  const links = soup.findAll('a');
+  return links.map(z => {
+    return extractLink(z).href;
   });
 };
 
+module.exports = {
+  extractSCEDUrls: readHTML,
+  urlOptions: reportLink
+};
