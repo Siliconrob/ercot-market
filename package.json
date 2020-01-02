@@ -12,7 +12,8 @@
     "jssoup": "0.0.10",
     "knex": "^0.20.6",
     "node-stream-zip": "^1.8.2",
-    "sqlite3": "^4.1.1"
+    "sqlite3": "^4.1.1",
+    "temp-write": "^4.0.0"
   },
   "devDependencies": {},
   "scripts": {
