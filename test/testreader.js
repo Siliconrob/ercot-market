@@ -1,8 +1,8 @@
 const reader = require('./readhtml');
 const contentDisposition = require('content-disposition');
 const axios = require('axios');
-const zip = require('unzip-simple');
-const fs = require('node-fs-extra');
+const unzip = require('unzip-simple').default;
+const fs = require('fs-extra');
 const tempWrite = require('temp-write');
 
 async function downloadZipFile(link) {
@@ -21,15 +21,19 @@ async function downloadZipFile(link) {
 }
 
 async function extractContents(zippedFile) {
-  const files = await zip.unzip({input: zippedFile, filter: '*.csv'});
-  console.log(files);
+  const files = await unzip({input: zippedFile, filter: '*.csv'});
+  const extractedFiles = files.map(async (file) => {
+    await fs.writeFile(file.name, file.buffer.toString());
+    return file.name;
+  });
+  const newFiles = await Promise.all(extractedFiles);
+  return newFiles;
 }
 
 (async function() {
   const urls = await reader.extractSCEDUrls();
   const urlPromises = urls.map(async (url) => {
-    const zipFile = await downloadZipFile(url);
-    await extractContents(zipFile);
+    const files = await extractContents(await downloadZipFile(url));
   });
   await Promise.all(urlPromises);
 })();
