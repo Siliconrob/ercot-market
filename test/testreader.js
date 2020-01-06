@@ -1,29 +1,35 @@
 const reader = require('./readhtml');
-
-//console.log(reader.urlOptions);
-
+const contentDisposition = require('content-disposition');
 const axios = require('axios');
-const streamZip = require('node-stream-zip');
-const fs = require('fs').promises;
+const zip = require('unzip-simple');
+const fs = require('node-fs-extra');
 const tempWrite = require('temp-write');
 
-async function zippedData(link) {
-  const response = await axios.get(link);
-  console.log(response);
-  return response.data;
-}
-
-(async function() {
-  const results = await reader.extractSCEDUrls();
-
-  const dl = results.shift();
-  console.log(dl);
+async function downloadZipFile(link) {
   const response = await axios({
-    url: dl,
+    url: link,
     method: 'GET',
     responseType: 'arraybuffer',
   });
 
+  const headerLine = contentDisposition.parse(response.headers['content-disposition']);
+  const fileName = headerLine.parameters.filename;
   const filePath = await tempWrite(Buffer.from(response.data));
-  await fs.writeFile('abc.zip', await fs.readFile(filePath));
+  await fs.remove(fileName);
+  await fs.writeFile(fileName, await fs.readFile(filePath));
+  return fileName;
+}
+
+async function extractContents(zippedFile) {
+  const files = await zip.unzip({input: zippedFile, filter: '*.csv'});
+  console.log(files);
+}
+
+(async function() {
+  const urls = await reader.extractSCEDUrls();
+  const urlPromises = urls.map(async (url) => {
+    const zipFile = await downloadZipFile(url);
+    await extractContents(zipFile);
+  });
+  await Promise.all(urlPromises);
 })();
