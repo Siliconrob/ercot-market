@@ -9,12 +9,14 @@ const server = Hapi.Server({
 });
 
 const init = async () => {
-    await server.register({
+    await server.register([{
       plugin: require('hapi-auto-route'),
       options: {
         routes_dir: Path.join(__dirname, 'routes')
-      }
-     });
+      }      
+    },{
+      plugin: require('hapi-align-json')
+    }]);
     await server.start();
     console.log(`Server is running at: ${server.info.uri}`);
 };

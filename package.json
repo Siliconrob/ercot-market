@@ -4,12 +4,14 @@
   "description": "Ercot Market Reader",
   "main": "index.js",
   "dependencies": {
+    "@hapi/boom": "^9.0.0",
     "@hapi/hapi": "^18.4.0",
     "@hapi/joi": "^16.1.8",
     "axios": "^0.19.0",
     "content-disposition": "^0.5.3",
     "csv": "^5.3.1",
     "fs-extra": "^8.1.0",
+    "hapi-align-json": "^4.0.0",
     "hapi-auto-route": "^3.0.4",
     "jssoup": "0.0.10",
     "knex": "^0.20.6",
@@ -17,7 +19,6 @@
     "temp-write": "^4.0.0",
     "unzip-simple": "^1.0.4"
   },
-  "devDependencies": {},
   "scripts": {
     "start": "node src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
