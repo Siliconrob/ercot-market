@@ -2,7 +2,6 @@
 
 const reader = require('../../test/readhtml');
 
-
 module.exports = {
     method: 'GET',
     path: '/sced',
